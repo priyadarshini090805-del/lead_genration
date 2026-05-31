@@ -1,0 +1,245 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─── Existing models (preserved + extended) ──────────────────────────────────
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String?
+  name              String?
+  role              String    @default("user")
+  avatar            String?
+  isVerified        Boolean   @default(false)
+  verificationToken String?
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  accounts         OAuthAccount[]
+  integrations     Integration[]
+  integrationTokens IntegrationToken[]
+  leads            Lead[]
+  messages         Message[]
+  campaigns        Campaign[]
+  contents         Content[]
+  activities       ActivityLog[]
+  auditLogs        AuditLog[]
+  notifications    Notification[]
+  scheduledTasks   ScheduledTask[]
+  workspace        Workspace?
+}
+
+model OAuthAccount {
+  id           String   @id @default(cuid())
+  provider     String
+  providerId   String
+  accessToken  String
+  refreshToken String?
+  scope        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+}
+
+model Integration {
+  id           String    @id @default(cuid())
+  provider     String
+  status       String    @default("CONNECTED")
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  lastSyncAt   DateTime?
+  metadata     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+}
+
+model Lead {
+  id          String    @id @default(cuid())
+  name        String
+  email       String?
+  phone       String?
+  company     String?
+  title       String?
+  platform    String
+  profileUrl  String?
+  avatarUrl   String?
+  status      String    @default("NEW")
+  tags        String?
+  notes       String?
+  unreadCount Int       @default(0)
+  linkedinId  String?
+  industry    String?
+  location    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  messages       Message[]
+  activities     ActivityLog[]
+  scheduledTasks ScheduledTask[]
+
+  @@index([userId, status])
+  @@index([userId, platform])
+}
+
+model Message {
+  id           String    @id @default(cuid())
+  content      String
+  type         String
+  status       String    @default("PENDING")
+  isIncoming   Boolean   @default(false)
+  sentiment    String?
+  scheduledFor DateTime?
+  sentAt       DateTime?
+  platform     String?
+  isGroupMsg   Boolean   @default(false)
+  relayId      String?
+  createdAt    DateTime  @default(now())
+  leadId       String
+  lead         Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Campaign {
+  id              String    @id @default(cuid())
+  name            String
+  description     String?
+  type            String
+  status          String    @default("DRAFT")
+  platform        String
+  messageTemplate String?
+  scheduledAt     DateTime?
+  completedAt     DateTime?
+  stats           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Content {
+  id          String    @id @default(cuid())
+  title       String
+  body        String
+  type        String
+  platform    String?
+  status      String    @default("DRAFT")
+  scheduledAt DateTime?
+  publishedAt DateTime?
+  mediaUrl    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String
+  status    String
+  details   String?
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leadId    String?
+  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  plan      String   @default("starter")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── New models ───────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   // LEAD_ASSIGNED|FOLLOW_UP_DUE|MESSAGE_SENT|MESSAGE_FAILED|CONTENT_PUBLISHED|CONTENT_FAILED|INTEGRATION_EXPIRED
+  read      Boolean  @default(false)
+  metadata  String?  // JSON extra context
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+}
+
+model ScheduledTask {
+  id           String    @id @default(cuid())
+  userId       String
+  type         String    // FOLLOW_UP|CONTENT_PUBLISH|CAMPAIGN_SEND
+  status       String    @default("PENDING") // PENDING|SCHEDULED|SENT|FAILED|CANCELLED
+  scheduledFor DateTime
+  timezone     String    @default("UTC")
+  payload      String    // JSON: {leadId?, contentId?, campaignId?, message?}
+  jobId        String?   // BullMQ job ID
+  attempts     Int       @default(0)
+  lastError    String?
+  executedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leadId       String?
+  lead         Lead?     @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([scheduledFor, status])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String   // e.g. "lead.created", "message.sent", "auth.login"
+  resource   String?  // e.g. "Lead", "Message"
+  resourceId String?
+  ipAddress  String?
+  userAgent  String?
+  metadata   String?  // JSON
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([resource, resourceId])
+}
+
+model IntegrationToken {
+  id           String    @id @default(cuid())
+  userId       String
+  provider     String    // linkedin|google|instagram
+  encryptedToken String  // AES-256 encrypted access token
+  encryptedRefresh String?
+  scopes       String?
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+}

@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --border: #262626;
+  --text: #fafafa;
+  --muted: #737373;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #404040; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #525252; }
+
+.glass {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #1a1a1a 25%, #262626 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.btn-primary {
+  @apply bg-white text-black font-medium px-4 py-2 rounded-lg text-sm hover:bg-gray-100 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed;
+}
+
+.btn-ghost {
+  @apply bg-transparent text-gray-400 border border-gray-800 font-medium px-4 py-2 rounded-lg text-sm hover:bg-gray-900 hover:text-white hover:border-gray-700 transition-all active:scale-95;
+}
+
+.input {
+  @apply w-full bg-neutral-900 border border-neutral-800 text-white rounded-lg px-3 py-2 text-sm placeholder:text-neutral-600 focus:outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700 transition-all;
+}
+
+.card {
+  @apply bg-neutral-900 border border-neutral-800 rounded-xl p-5;
+}
+
+.badge {
+  @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+}
+
+.badge-new { @apply badge bg-neutral-800 text-neutral-300; }
+.badge-contacted { @apply badge bg-neutral-700 text-neutral-200; }
+.badge-converted { @apply badge bg-white/10 text-white border border-white/20; }
+.badge-lost { @apply badge bg-neutral-800 text-neutral-500; }
+.badge-linkedin { @apply badge bg-neutral-800 text-blue-400; }
+.badge-google { @apply badge bg-neutral-800 text-red-400; }
+.badge-positive { @apply badge bg-white/10 text-green-400; }
+.badge-negative { @apply badge bg-white/10 text-red-400; }
+.badge-neutral { @apply badge bg-neutral-800 text-neutral-400; }
+
+.nav-item {
+  @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all cursor-pointer;
+}
+
+.nav-item.active {
+  @apply text-white bg-neutral-800;
+}
+
+.stat-card {
+  @apply card flex flex-col gap-1;
+}

@@ -1,0 +1,16 @@
+.git
+.github
+.next
+node_modules
+npm-debug.log
+.env
+.env.local
+.env.*.local
+coverage
+__tests__
+*.test.ts
+*.spec.ts
+README.md
+docker-compose*.yml
+Dockerfile
+.dockerignore
