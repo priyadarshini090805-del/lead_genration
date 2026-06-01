@@ -35,7 +35,7 @@ export function startContentWorker() {
 
       logger.info(`[content] job ${job.id} completed`);
     },
-    { connection: createBullMQConnection() }
+    { connection: createBullMQConnection() as any }
   );
 
   worker.on("failed", async (job, err) => {

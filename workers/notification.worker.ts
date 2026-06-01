@@ -22,7 +22,7 @@ export function startNotificationWorker() {
 
       logger.info(`[notification] created ${type} for user ${userId}`);
     },
-    { connection: createBullMQConnection() }
+    { connection: createBullMQConnection() as any }
   );
 
   worker.on("failed", (job, err) => {

@@ -48,7 +48,7 @@ export function startOutreachWorker() {
 
       logger.info(`[outreach] job ${job.id} completed`);
     },
-    { connection: createBullMQConnection() }
+    { connection: createBullMQConnection() as any }
   );
 
   worker.on("failed", async (job, err) => {
