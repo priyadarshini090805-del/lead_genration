@@ -7,7 +7,7 @@ const config: Config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
   },
-  testPathPattern: "__tests__",
+
   collectCoverageFrom: [
     "lib/**/*.ts",
     "app/api/**/*.ts",
