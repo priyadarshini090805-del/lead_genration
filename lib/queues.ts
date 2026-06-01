@@ -12,22 +12,22 @@ const defaultJobOptions = {
 // BullMQ uses BLPOP / subscribe internally — sharing connections with regular
 // Redis commands (ping, INCR, …) causes "Connection is in subscriber mode" errors.
 export const leadQueue = new Queue("lead", {
-  connection: createBullMQConnection(),
+  connection: createBullMQConnection() as any,
   defaultJobOptions,
 });
 
 export const outreachQueue = new Queue("outreach", {
-  connection: createBullMQConnection(),
+  connection: createBullMQConnection() as any,
   defaultJobOptions,
 });
 
 export const contentQueue = new Queue("content", {
-  connection: createBullMQConnection(),
+  connection: createBullMQConnection() as any,
   defaultJobOptions,
 });
 
 export const notificationQueue = new Queue("notification", {
-  connection: createBullMQConnection(),
+  connection: createBullMQConnection() as any,
   defaultJobOptions: { ...defaultJobOptions, attempts: 5 },
 });
 
