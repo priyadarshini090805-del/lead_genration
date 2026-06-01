@@ -45,7 +45,11 @@ export function LeadsManager() {
 
   async function deleteSelected() {
     if (!confirm(`Delete ${selected.size} leads?`)) return;
-    await Promise.all([...selected].map(id => fetch(`/api/leads/${id}`, { method: "DELETE" })));
+    await Promise.all(
+     Array.from(selected).map(id =>
+      fetch(`/api/leads/${id}`, { method: "DELETE" })
+     )
+   );
     setSelected(new Set());
     load();
   }
