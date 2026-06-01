@@ -128,7 +128,7 @@ async unlinkAccount({ providerAccountId, provider }: any) {
     async updateSession(session: any) {
       return session;
     },
-    async deleteSession(_sessionToken: any) {}
+    async deleteSession(_sessionToken: any) {},
 
     // ── Verification token (not used) ─────────────────────────────────────
     async createVerificationToken(vt: any) {
