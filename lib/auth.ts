@@ -29,7 +29,7 @@ function toAdapterUser(u: {
 function HanexisAdapter(): Adapter {
   return {
     // ── User ──────────────────────────────────────────────────────────────
-    async createUser(user) {
+    async createUser(user: any) {
       const created = await prisma.user.create({
         data: {
           email: user.email!,
@@ -49,17 +49,17 @@ function HanexisAdapter(): Adapter {
       return toAdapterUser(created);
     },
 
-    async getUser(id) {
+    async getUser(id: any) {
       const u = await prisma.user.findUnique({ where: { id } });
       return u ? toAdapterUser(u) : null;
     },
 
-    async getUserByEmail(email) {
+    async getUserByEmail(email: any) {
       const u = await prisma.user.findUnique({ where: { email } });
       return u ? toAdapterUser(u) : null;
     },
 
-    async getUserByAccount({ providerAccountId, provider }) {
+    async getUserByAccount({ providerAccountId, provider }: any) {
       const account = await prisma.oAuthAccount.findUnique({
         where: { provider_providerId: { provider, providerId: providerAccountId } },
         include: { user: true },
@@ -67,7 +67,7 @@ function HanexisAdapter(): Adapter {
       return account ? toAdapterUser(account.user) : null;
     },
 
-    async updateUser(user) {
+    async updateUser(user: any) {
       const updated = await prisma.user.update({
         where: { id: user.id },
         data: {
@@ -78,12 +78,12 @@ function HanexisAdapter(): Adapter {
       return toAdapterUser(updated);
     },
 
-    async deleteUser(userId) {
+    async deleteUser(userId: any) {
       await prisma.user.delete({ where: { id: userId } }).catch(() => null);
     },
 
     // ── Account linking ───────────────────────────────────────────────────
-    async linkAccount(account) {
+    async linkAccount(account: any) {
       await prisma.oAuthAccount.upsert({
         where: {
           provider_providerId: {
@@ -108,7 +108,7 @@ function HanexisAdapter(): Adapter {
       return account;
     },
 
-    async unlinkAccount({ providerAccountId, provider }) {
+async unlinkAccount({ providerAccountId, provider }: any) {
       await prisma.oAuthAccount
         .delete({
           where: {
@@ -119,22 +119,22 @@ function HanexisAdapter(): Adapter {
     },
 
     // ── Session (not used — JWT strategy) ────────────────────────────────
-    async createSession(session) {
+    async createSession(session: any) {
       return session;
     },
-    async getSessionAndUser(_sessionToken) {
+    async getSessionAndUser(_sessionToken: any) {
       return null;
     },
-    async updateSession(session) {
+    async updateSession(session: any) {
       return session;
     },
-    async deleteSession(_sessionToken) {},
+    async deleteSession(_sessionToken: any) {}
 
     // ── Verification token (not used) ─────────────────────────────────────
-    async createVerificationToken(vt) {
+    async createVerificationToken(vt: any) {
       return vt;
     },
-    async useVerificationToken(_params) {
+    async useVerificationToken(_params: any) {
       return null;
     },
   };
@@ -193,7 +193,7 @@ LinkedInProvider({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials: any) {
         if (!credentials?.email || !credentials?.password) return null;
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
@@ -214,7 +214,7 @@ LinkedInProvider({
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account }: any) {
       if (user) {
         token.id = user.id;
       }
@@ -226,7 +226,7 @@ LinkedInProvider({
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       if (token) {
         session.user.id = token.id as string;
         (session as any).linkedinAccessToken = token.linkedinAccessToken;
@@ -234,7 +234,7 @@ LinkedInProvider({
       }
       return session;
     },
-    async signIn({ user, account }) {
+    async signIn({ user, account }: any) {
       // Store integration tokens for LinkedIn / Google after OAuth sign-in.
       if (account && user.id) {
         try {
