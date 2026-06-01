@@ -1,3 +1,4 @@
+import { contentQueue } from "@/lib/queues";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -24,6 +25,20 @@ export async function POST(req: NextRequest) {
     const content = await prisma.content.create({
       data: { title, body: contentBody, type, platform, scheduledAt: scheduledAt ? new Date(scheduledAt) : null, status: scheduledAt ? "SCHEDULED" : "DRAFT", userId: session.user.id },
     });
+    if (scheduledAt) {
+  await contentQueue.add(
+    "publish-content",
+    {
+      contentId: content.id,
+      userId: session.user.id,
+      platform,
+      scheduledTaskId: content.id,
+    },
+    {
+      delay: new Date(scheduledAt).getTime() - Date.now(),
+    }
+  );
+}
     return NextResponse.json(content, { status: 201 });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
