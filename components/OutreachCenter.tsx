@@ -39,7 +39,7 @@ export function OutreachCenter() {
     setSending(true); setResult(null);
     const res = await fetch("/api/messages/group", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ leadIds: [...selectedLeads], content: message, type: msgType, platform: relay, scheduledFor: scheduledFor || null, relayId: relay }),
+      body: JSON.stringify({ leadIds: Array.from(selectedLeads), content: message, type: msgType, platform: relay, scheduledFor: scheduledFor || null, relayId: relay }),
     });
     const d = await res.json();
     setResult(d); setSending(false);
